@@ -7,6 +7,7 @@
           :locale="myLocale"
           color="orange-5"
           :events="events"
+          :event-color="isEvent"
         />
       </div>
       <q-tab-panels v-model="date">
@@ -15,8 +16,8 @@
           :key="event.date"
           :name="event.date"
         >
-          <div class="text-h4 q-mb-md">Aniversário da Clara</div>
-          <p>sei la irmao</p>
+          <div class="text-h4 q-mb-md">{{ event.name }}</div>
+          <p>{{ event.description }}</p>
         </q-tab-panel>
       </q-tab-panels>
     </div>
@@ -53,6 +54,13 @@ export default defineComponent({
           const formattedString = date.formatDate(fixedDate, "YYYY/MM/D");
 
           EventDays.value.push(formattedString);
+
+          ObjectsEvents.value.push({
+            date: formattedString,
+            name: obj["name"],
+            description: obj["name"],
+            isHolyday: true,
+          });
         }
       } catch (error) {
         console.error(error);
@@ -70,16 +78,29 @@ export default defineComponent({
         date: "2022/06/05",
         name: "Danilo day",
         description: "Mansão faça acontecer.",
-        isHolyday: true,
+        isHolyday: false,
       },
     ]);
     const EventDays = ref(["2022/06/11", "2022/06/05"]);
+
+    const isEvent = (stringDate) => {
+      const pegaEvento = ObjectsEvents.value.filter((el) =>
+        el.date == stringDate ? true : false
+      );
+      return checkHolyday(pegaEvento[0]);
+    };
+
+    const checkHolyday = (event) => {
+      return event.isHolyday ? "secondary" : "accent";
+    };
 
     onMounted(() => {
       getHolidays();
     });
 
     return {
+      isEvent,
+      checkHolyday,
       ObjectsEvents,
       splitterModel: ref(50),
       date: ref(todaysDate()),
