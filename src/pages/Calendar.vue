@@ -45,9 +45,7 @@ export default defineComponent({
   setup() {
     const getHolidays = async () => {
       try {
-        const { data } = await api.get(
-          "https://brasilapi.com.br/api/feriados/v1/2022"
-        );
+        const { data } = await api.get("2022");
         for (const obj of data) {
           // incremento para corrigir o método formatDate que decresce 1 dia
           const fixedDate = date.addToDate(obj["date"], { days: 1 });
