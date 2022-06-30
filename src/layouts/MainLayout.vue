@@ -17,7 +17,12 @@
 
     <q-drawer v-model="leftDrawerOpen" show-if-above bordered>
       <q-list>
-        <q-item-label header> Other Pages </q-item-label>
+        <q-item-label header> Pages </q-item-label>
+        <Essential-link
+          v-for="link in essentialLinks"
+          :key="link.title"
+          v-bind="link"
+        />
       </q-list>
     </q-drawer>
 
@@ -29,16 +34,31 @@
 
 <script>
 import { defineComponent, ref } from "vue";
+import EssentialLink from "components/EssentialLink.vue";
+
+const linkList = [
+  {
+    title: "Calendar",
+    icon: "calendar_month",
+    route: { name: "CalendarApp" },
+  },
+  {
+    title: "New Event",
+    icon: "event",
+    route: { name: "eventPost" },
+  },
+];
 
 export default defineComponent({
   name: "MainLayout",
 
-  components: {},
+  components: { EssentialLink },
 
   setup() {
     const leftDrawerOpen = ref(false);
 
     return {
+      essentialLinks: linkList,
       leftDrawerOpen,
       toggleLeftDrawer() {
         leftDrawerOpen.value = !leftDrawerOpen.value;

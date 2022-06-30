@@ -1,6 +1,6 @@
 <template>
   <q-page padding>
-    <div class="q-pa-md">
+    <div id="container" class="q-pa-md">
       <div class="q-pb-sm">
         <q-date
           v-model="date"
@@ -10,16 +10,33 @@
           :event-color="isEvent"
         />
       </div>
+      <div
+        :key="date"
+        class="text-h4 text-grey-6 q-pa-md"
+        v-if="!events.includes(date)"
+      >
+        Não há eventos
+      </div>
       <q-tab-panels v-model="date">
         <q-tab-panel
           v-for="event of ObjectsEvents"
           :key="event.date"
           :name="event.date"
         >
-          <div class="text-h4 q-mb-md">{{ event.name }}</div>
+          <div class="text-h4 q-mb-md">
+            {{ event.name }}
+          </div>
           <p>{{ event.description }}</p>
         </q-tab-panel>
       </q-tab-panels>
+      <q-page-sticky position="bottom-right" :offset="[24, 24]">
+        <q-btn
+          :to="{ name: 'eventPost' }"
+          round
+          icon="add"
+          color="cyan-5"
+        ></q-btn>
+      </q-page-sticky>
     </div>
   </q-page>
 </template>
@@ -68,7 +85,7 @@ export default defineComponent({
       //sample events
       {
         date: "2022/06/11",
-        name: "Aniver da Clara",
+        name: "Aniver da Claraaa",
         description: "Almoço no govinda!",
         isHolyday: false,
       },
