@@ -7,7 +7,8 @@
           :locale="myLocale"
           color="orange-5"
           :events="events"
-          :event-color="isEvent"
+          :event-color="colorEvent"
+          today-btn
         />
       </div>
       <div
@@ -29,12 +30,26 @@
           <p>{{ event.description }}</p>
         </q-tab-panel>
       </q-tab-panels>
+
       <q-page-sticky position="bottom-right" :offset="[24, 24]">
         <q-btn
           :to="{ name: 'eventPost' }"
           round
           icon="add"
           color="cyan-5"
+        ></q-btn>
+      </q-page-sticky>
+
+      <q-page-sticky
+        v-if="events.includes(date)"
+        position="bottom-left"
+        :offset="[24, 24]"
+      >
+        <q-btn
+          round
+          icon="delete"
+          color="accent"
+          @click="handleDeleteEvent"
         ></q-btn>
       </q-page-sticky>
     </div>
@@ -44,7 +59,9 @@
 <script>
 import { defineComponent, ref, onMounted } from "vue";
 import { date } from "quasar";
-import { api } from "boot/axios";
+import { apiHoliday } from "src/boot/axios";
+import eventsService from "src/services/eventsService.js";
+import { useQuasar } from "quasar";
 import {
   days,
   daysShort,
@@ -54,20 +71,24 @@ import {
 
 let todaysDate = () => {
   const timeStamp = Date.now();
-  return date.formatDate(timeStamp, "YYYY/MM/D");
+  return date.formatDate(timeStamp, "YYYY/MM/DD");
 };
 export default defineComponent({
   name: "CalendarApp",
 
   setup() {
+    const $q = useQuasar();
+    const EventDays = ref([]);
+    const ObjectsEvents = ref([]);
+    const { getEvents, removeEvents } = eventsService();
+
     const getHolidays = async () => {
       try {
-        const { data } = await api.get("2022");
+        const { data } = await apiHoliday.get("2022");
         for (const obj of data) {
           // incremento para corrigir o método formatDate que decresce 1 dia
           const fixedDate = date.addToDate(obj["date"], { days: 1 });
           const formattedString = date.formatDate(fixedDate, "YYYY/MM/D");
-
           EventDays.value.push(formattedString);
 
           ObjectsEvents.value.push({
@@ -81,24 +102,30 @@ export default defineComponent({
         console.error(error);
       }
     };
-    const ObjectsEvents = ref([
-      //sample events
-      {
-        date: "2022/06/11",
-        name: "Aniver da Claraaa",
-        description: "Almoço no govinda!",
-        isHolyday: false,
-      },
-      {
-        date: "2022/06/05",
-        name: "Danilo day",
-        description: "Mansão faça acontecer.",
-        isHolyday: false,
-      },
-    ]);
-    const EventDays = ref(["2022/06/11", "2022/06/05"]);
+    const listEvents = async () => {
+      try {
+        const data = await getEvents();
+        for (const event of data) {
+          ObjectsEvents.value.push(event);
+        }
+        for (const event of ObjectsEvents.value) {
+          EventDays.value.push(event.date);
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    };
 
-    const isEvent = (stringDate) => {
+    const pegaId = (stringDate) => {
+      const filter = ObjectsEvents.value.filter((el) => {
+        el.date == stringDate ? true : false;
+      });
+      const myEvent = filter[0];
+
+      return myEvent[id] + "";
+    };
+
+    const colorEvent = (stringDate) => {
       const pegaEvento = ObjectsEvents.value.filter((el) =>
         el.date == stringDate ? true : false
       );
@@ -109,13 +136,23 @@ export default defineComponent({
       return event.isHolyday ? "secondary" : "accent";
     };
 
-    onMounted(() => {
-      getHolidays();
+    const handleDeleteEvent = async (id) => {
+      try {
+        await removeEvents(id);
+        $q.notify("Evento deletado");
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    onMounted(async () => {
+      await getHolidays(), await listEvents();
     });
 
     return {
-      isEvent,
+      colorEvent,
       checkHolyday,
+      handleDeleteEvent,
+      pegaId,
       ObjectsEvents,
       splitterModel: ref(50),
       date: ref(todaysDate()),
