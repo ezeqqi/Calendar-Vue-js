@@ -9,6 +9,14 @@ export default function useApiEvents(url) {
       console.error(error)
     }
   }
+  const getById = async (id) => {
+    try {
+      const { data } = await apiEvents.get(`${url}/${id}`)
+      return data
+    } catch (error) {
+      console.error(error)
+    }
+  }
 
   const postEvents = async (form) => {
     try {
@@ -40,6 +48,7 @@ export default function useApiEvents(url) {
     getEvents,
     postEvents,
     putEvents,
-    removeEvents
+    removeEvents,
+    getById
   }
 }

@@ -1,25 +1,11 @@
 {
   "DbEvents": [
     {
-      "id": 1,
-      "date": "2022/07/11",
-      "name": "Aniver da Gisele",
-      "description": "Caldeirao da bruxa",
-      "isHoliday": false
-    },
-    {
-      "id": 1,
-      "date": "2022/07/04",
-      "name": "Chega meu fone novo",
-      "description": "Fonezinhooooo",
-      "isHoliday": true
-    },
-    {
-      "date": "2022/07/25",
-      "name": "ezequiel",
-      "description": "ta maluco",
+      "date": "2022/07/17",
+      "name": "Evento teste",
+      "description": "descrição teste",
       "isHoliday": false,
-      "id": 2
+      "id": 1
     }
   ]
 }

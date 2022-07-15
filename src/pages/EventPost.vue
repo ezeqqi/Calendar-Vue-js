@@ -34,8 +34,19 @@
             <q-icon size="24px" name="subject" />
           </template>
         </q-input>
-        <div class="full-width row q-pa-md">
-          <q-btn class="col-grow" color="orange-5" type="submit">Submit</q-btn>
+        <div class="row q-gutter-sm">
+          <q-btn
+            label="Cancel"
+            class="col"
+            color="teal-5"
+            :to="{ name: 'CalendarApp' }"
+          ></q-btn>
+          <q-btn
+            label="Submit"
+            class="col"
+            color="orange-5"
+            type="submit"
+          ></q-btn>
         </div>
       </q-form>
     </div>
@@ -43,8 +54,9 @@
 </template>
 
 <script>
-import { defineComponent, ref } from "vue";
+import { defineComponent, onMounted, ref } from "vue";
 import { date } from "quasar";
+import { useRouter, useRoute } from "vue-router";
 import eventsService from "src/services/eventsService";
 
 let todaysDate = () => {
@@ -56,12 +68,19 @@ export default defineComponent({
   name: "createEvent",
 
   setup() {
-    const { postEvents } = eventsService();
+    const { postEvents, getById, putEvents } = eventsService();
+    const router = useRouter();
+    const route = useRoute();
 
     const submitEvent = async () => {
       try {
-        const data = await postEvents(form.value);
-        return data;
+        if (form.value.id) {
+          await putEvents(form.value);
+        } else {
+          await postEvents(form.value);
+        }
+
+        router.push({ name: "CalendarApp" });
       } catch (error) {
         console.error(error);
       }
@@ -71,6 +90,20 @@ export default defineComponent({
       name: "",
       description: "",
       isHoliday: false,
+    });
+
+    const getEventFields = async (id) => {
+      try {
+        const response = await getById(id);
+        form.value = response;
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    onMounted(async () => {
+      if (route.params.id) {
+        getEventFields(route.params.id);
+      }
     });
     return {
       form,

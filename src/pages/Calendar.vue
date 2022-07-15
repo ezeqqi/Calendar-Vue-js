@@ -28,6 +28,25 @@
             {{ event.name }}
           </div>
           <p>{{ event.description }}</p>
+
+          <q-page-sticky position="bottom-left" :offset="[24, 24]">
+            <q-btn
+              round
+              icon="delete"
+              color="accent"
+              @click="handleDeleteEvent(event.id)"
+              v-if="ObjectsEvents.some((el) => el.date === date)"
+            ></q-btn>
+          </q-page-sticky>
+          <q-page-sticky position="bottom" :offset="[24, 24]">
+            <q-btn
+              round
+              icon="edit"
+              color="teal-5"
+              @click="handleEditEvent(event.id)"
+              v-if="ObjectsEvents.some((el) => el.date === date)"
+            ></q-btn>
+          </q-page-sticky>
         </q-tab-panel>
       </q-tab-panels>
 
@@ -36,20 +55,7 @@
           :to="{ name: 'eventPost' }"
           round
           icon="add"
-          color="cyan-5"
-        ></q-btn>
-      </q-page-sticky>
-
-      <q-page-sticky
-        v-if="events.includes(date)"
-        position="bottom-left"
-        :offset="[24, 24]"
-      >
-        <q-btn
-          round
-          icon="delete"
-          color="accent"
-          @click="handleDeleteEvent"
+          color="orange-5"
         ></q-btn>
       </q-page-sticky>
     </div>
@@ -59,7 +65,7 @@
 <script>
 import { defineComponent, ref, onMounted } from "vue";
 import { date } from "quasar";
-import { apiHoliday } from "src/boot/axios";
+//import { apiHoliday } from "src/boot/axios";
 import eventsService from "src/services/eventsService.js";
 import { useQuasar } from "quasar";
 import {
@@ -68,6 +74,7 @@ import {
   months,
   monthsShort,
 } from "src/components/date-locale.js";
+import { useRouter } from "vue-router";
 
 let todaysDate = () => {
   const timeStamp = Date.now();
@@ -81,8 +88,8 @@ export default defineComponent({
     const EventDays = ref([]);
     const ObjectsEvents = ref([]);
     const { getEvents, removeEvents } = eventsService();
-
-    const getHolidays = async () => {
+    const router = useRouter();
+    /* const getHolidays = async () => {
       try {
         const { data } = await apiHoliday.get("2022");
         for (const obj of data) {
@@ -96,12 +103,13 @@ export default defineComponent({
             name: obj["name"],
             description: obj["name"],
             isHolyday: true,
+            id: Math.random(),
           });
         }
       } catch (error) {
         console.error(error);
       }
-    };
+    }; */
     const listEvents = async () => {
       try {
         const data = await getEvents();
@@ -115,48 +123,53 @@ export default defineComponent({
         console.error(error);
       }
     };
-
-    const pegaId = (stringDate) => {
-      const filter = ObjectsEvents.value.filter((el) => {
-        el.date == stringDate ? true : false;
-      });
-      const myEvent = filter[0];
-
-      return myEvent[id] + "";
-    };
-
     const colorEvent = (stringDate) => {
       const pegaEvento = ObjectsEvents.value.filter((el) =>
         el.date == stringDate ? true : false
       );
-      return checkHolyday(pegaEvento[0]);
-    };
-
-    const checkHolyday = (event) => {
-      return event.isHolyday ? "secondary" : "accent";
+      return pegaEvento[0].isHolyday ? "secondary" : "accent";
     };
 
     const handleDeleteEvent = async (id) => {
       try {
-        await removeEvents(id);
-        $q.notify("Evento deletado");
+        $q.dialog({
+          title: "Confirmação",
+          message: "Quer mesmo deletar?",
+          cancel: true,
+          persistent: true,
+        }).onOk(async () => {
+          await removeEvents(id);
+          const indexBrabo = ObjectsEvents.value.findIndex(
+            (el) => el.id === id
+          );
+          const indexMenor = EventDays.value.indexOf(todaysDate());
+
+          EventDays.value.splice(indexMenor, 1);
+          ObjectsEvents.value.splice(indexBrabo, 1);
+
+          $q.notify("Evento deletado");
+        });
       } catch (error) {
         console.error(error);
       }
     };
+    const handleEditEvent = (id) => {
+      router.push({ name: "eventPost", params: { id } });
+    };
+
     onMounted(async () => {
-      await getHolidays(), await listEvents();
+      //await getHolidays(),
+      await listEvents();
     });
 
     return {
       colorEvent,
-      checkHolyday,
       handleDeleteEvent,
-      pegaId,
+      handleEditEvent,
       ObjectsEvents,
       splitterModel: ref(50),
       date: ref(todaysDate()),
-      events: EventDays,
+      events: ref(EventDays),
       myLocale: {
         days: days,
         daysShort: daysShort,
