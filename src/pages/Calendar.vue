@@ -34,7 +34,7 @@
               round
               icon="delete"
               color="accent"
-              @click="handleDeleteEvent(event.id)"
+              @click="handleDeleteEvent(event._id)"
               v-if="ObjectsEvents.some((el) => el.date === date)"
             ></q-btn>
           </q-page-sticky>
@@ -43,7 +43,7 @@
               round
               icon="edit"
               color="teal-5"
-              @click="handleEditEvent(event.id)"
+              @click="handleEditEvent(event._id)"
               v-if="ObjectsEvents.some((el) => el.date === date)"
             ></q-btn>
           </q-page-sticky>
@@ -113,6 +113,8 @@ export default defineComponent({
     const listEvents = async () => {
       try {
         const data = await getEvents();
+        console.log('response ', data);
+
         for (const event of data) {
           ObjectsEvents.value.push(event);
         }
@@ -120,7 +122,7 @@ export default defineComponent({
           EventDays.value.push(event.date);
         }
       } catch (error) {
-        console.error(error);
+        console.error('lisevents error ', error);
       }
     };
     const colorEvent = (stringDate) => {
@@ -134,13 +136,13 @@ export default defineComponent({
       try {
         $q.dialog({
           title: "Confirmação",
-          message: "Quer mesmo deletar?",
+          message: "Quer mesmo deletar esse evento?",
           cancel: true,
           persistent: true,
         }).onOk(async () => {
           await removeEvents(id);
           const indexBrabo = ObjectsEvents.value.findIndex(
-            (el) => el.id === id
+            (el) => el._id === id
           );
           const indexMenor = EventDays.value.indexOf(todaysDate());
 

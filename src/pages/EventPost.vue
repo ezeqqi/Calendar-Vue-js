@@ -74,7 +74,7 @@ export default defineComponent({
 
     const submitEvent = async () => {
       try {
-        if (form.value.id) {
+        if (form.value._id !== "") {
           await putEvents(form.value);
         } else {
           await postEvents(form.value);
@@ -90,6 +90,7 @@ export default defineComponent({
       name: "",
       description: "",
       isHoliday: false,
+      _id: "",
     });
 
     const getEventFields = async (id) => {

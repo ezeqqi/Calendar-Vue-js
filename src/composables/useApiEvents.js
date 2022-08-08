@@ -29,7 +29,7 @@ export default function useApiEvents(url) {
 
   const putEvents = async (form) => {
     try {
-      const { data } = await apiEvents.put(`${url}/${form.id}`, form)
+      const { data } = await apiEvents.put(`${url}/${form._id}`, form)
       return data
     } catch (error) {
       console.error(error)
